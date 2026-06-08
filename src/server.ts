@@ -1,6 +1,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { AppContext } from "./context.js";
 import {
+  addSection,
+  addSectionDescription,
+  addSectionInputSchema,
+} from "./tools/add-section.js";
+import {
   addChecklist,
   addChecklistDescription,
   addChecklistInputSchema,
@@ -224,6 +229,16 @@ export function buildServer(ctx: AppContext): McpServer {
       inputSchema: createTripInputSchema,
     },
     requireAuth(ctx, async (args) => createTrip(ctx, args as Parameters<typeof createTrip>[1])),
+  );
+
+  server.registerTool(
+    "wanderlog_add_section",
+    {
+      title: "Create a custom section in a Wanderlog trip",
+      description: addSectionDescription,
+      inputSchema: addSectionInputSchema,
+    },
+    requireAuth(ctx, async (args) => addSection(ctx, args as Parameters<typeof addSection>[1])),
   );
 
   server.registerTool(
