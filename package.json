@@ -4,11 +4,12 @@
   "description": "MCP server for Wanderlog — let Claude build and edit your trip itineraries through conversation",
   "type": "module",
   "bin": {
-    "wanderlog-mcp": "dist-single/index.js"
+    "wanderlog-mcp": "wanderlog-mcp.cmd"
   },
   "main": "dist-single/index.js",
   "files": [
     "dist-single/",
+    "wanderlog-mcp.cmd",
     "README.md",
     "LICENSE"
   ],
