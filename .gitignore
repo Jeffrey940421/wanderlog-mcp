@@ -2,7 +2,7 @@
 .env.*
 !.env.example
 node_modules/
-dist/
+# dist/  — committed for direct GitHub install
 *.har
 *.log
 .DS_Store
