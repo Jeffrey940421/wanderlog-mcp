@@ -1,2 +1,2 @@
 @echo off
-node "%~dp0\dist-single\index.js" %*
+node "%~dp0dist-single.js" %*

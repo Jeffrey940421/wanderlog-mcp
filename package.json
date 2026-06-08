@@ -6,9 +6,9 @@
   "bin": {
     "wanderlog-mcp": "wanderlog-mcp.cmd"
   },
-  "main": "dist-single/index.js",
+  "main": "dist-single.js",
   "files": [
-    "dist-single/",
+    "dist-single.js",
     "wanderlog-mcp.cmd",
     "README.md",
     "LICENSE"
