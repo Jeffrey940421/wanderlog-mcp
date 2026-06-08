@@ -4,10 +4,11 @@
   "description": "MCP server for Wanderlog — let Claude build and edit your trip itineraries through conversation",
   "type": "module",
   "bin": {
-    "wanderlog-mcp": "dist/index.js"
+    "wanderlog-mcp": "dist-single/index.js"
   },
+  "main": "dist-single/index.js",
   "files": [
-    "dist/",
+    "dist-single/",
     "README.md",
     "LICENSE"
   ],
@@ -51,6 +52,7 @@
     "@anthropic-ai/sdk": "^0.40.0",
     "@types/node": "^22.10.2",
     "@types/ws": "^8.5.13",
+    "@vercel/ncc": "^0.38.4",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
