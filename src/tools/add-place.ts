@@ -8,6 +8,7 @@ import {
   buildPlaceBlock,
   findDaySectionByDate,
   findPlacesToVisitSection,
+  findSectionByHeading,
   findTripCenter,
   requireUserId,
   submitOp,
@@ -85,15 +86,28 @@ export async function addPlace(
     let targetIndex: number;
     let targetLabel: string;
     if (args.day) {
-      const daySection = resolveDay(trip, args.day);
-      const found = findDaySectionByDate(trip, daySection.date!);
-      if (!found) {
-        throw new WanderlogValidationError(
-          `Day ${args.day} not found in trip`,
-        );
+      // Try day reference first (e.g. "day 2", "2026-05-04")
+      try {
+        const daySection = resolveDay(trip, args.day);
+        const found = findDaySectionByDate(trip, daySection.date!);
+        if (found) {
+          targetIndex = found.index;
+          targetLabel = `day ${daySection.date}`;
+        } else {
+          throw new Error("not found");
+        }
+      } catch {
+        // Fallback: try heading-based section lookup (e.g. "寿司", "焼肉")
+        const byHeading = findSectionByHeading(trip, args.day);
+        if (byHeading) {
+          targetIndex = byHeading.index;
+          targetLabel = `"${args.day}" section`;
+        } else {
+          throw new WanderlogValidationError(
+            `Could not understand day reference "${args.day}"\n\nTry a format like "day 2", "May 4", or "2026-05-04".`,
+          );
+        }
       }
-      targetIndex = found.index;
-      targetLabel = `day ${daySection.date}`;
     } else {
       const places = findPlacesToVisitSection(trip);
       if (!places) {

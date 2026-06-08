@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { WanderlogError, WanderlogValidationError } from "../errors.js";
 import { resolveDay } from "../resolvers/day.js";
-import { buildPlaceBlock, findDaySectionByDate, findPlacesToVisitSection, findTripCenter, requireUserId, submitOp, } from "./shared.js";
+import { buildPlaceBlock, findDaySectionByDate, findPlacesToVisitSection, findSectionByHeading, findTripCenter, requireUserId, submitOp, } from "./shared.js";
 export const addPlaceInputSchema = {
     trip_key: z
         .string()
@@ -53,13 +53,29 @@ export async function addPlace(ctx, args) {
         let targetIndex;
         let targetLabel;
         if (args.day) {
-            const daySection = resolveDay(trip, args.day);
-            const found = findDaySectionByDate(trip, daySection.date);
-            if (!found) {
-                throw new WanderlogValidationError(`Day ${args.day} not found in trip`);
+            // Try day reference first (e.g. "day 2", "2026-05-04")
+            try {
+                const daySection = resolveDay(trip, args.day);
+                const found = findDaySectionByDate(trip, daySection.date);
+                if (found) {
+                    targetIndex = found.index;
+                    targetLabel = `day ${daySection.date}`;
+                }
+                else {
+                    throw new Error("not found");
+                }
             }
-            targetIndex = found.index;
-            targetLabel = `day ${daySection.date}`;
+            catch {
+                // Fallback: try heading-based section lookup (e.g. "寿司", "焼肉")
+                const byHeading = findSectionByHeading(trip, args.day);
+                if (byHeading) {
+                    targetIndex = byHeading.index;
+                    targetLabel = `"${args.day}" section`;
+                }
+                else {
+                    throw new WanderlogValidationError(`Could not understand day reference "${args.day}"\n\nTry a format like "day 2", "May 4", or "2026-05-04".`);
+                }
+            }
         }
         else {
             const places = findPlacesToVisitSection(trip);

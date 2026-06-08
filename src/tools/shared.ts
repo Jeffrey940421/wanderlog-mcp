@@ -187,6 +187,27 @@ export function findHotelsSection(trip: TripPlan): {
 }
 
 /**
+ * Finds a custom placeList section by heading name (e.g. "寿司", "焼肉").
+ * Returns null if no matching section exists.
+ */
+export function findSectionByHeading(
+  trip: TripPlan,
+  heading: string,
+): { index: number; section: Section } | null {
+  for (let i = 0; i < trip.itinerary.sections.length; i++) {
+    const s = trip.itinerary.sections[i]!;
+    if (
+      s.type === "normal" &&
+      s.mode === "placeList" &&
+      s.heading === heading
+    ) {
+      return { index: i, section: s };
+    }
+  }
+  return null;
+}
+
+/**
  * Finds a day section by ISO date. Returns null if no matching section exists
  * (e.g. the date is outside the trip range).
  */
