@@ -10,6 +10,7 @@ import {
   findPlacesToVisitSection,
   findSectionByHeading,
   findTripCenter,
+  noteToDeltaOps,
   requireUserId,
   submitOp,
 } from "./shared.js";
@@ -163,12 +164,14 @@ export async function addPlace(
     await submitOp(ctx, args.trip_key, ops);
 
     // Follow-up: set inline note text via rich-text subtype op
+    // Supports **bold** and *italic* markdown syntax via Quill delta
     if (args.note) {
+      const deltaOps = noteToDeltaOps(args.note);
       const textOps: Json0Op[] = [
         {
           p: [...blockPath, "text"],
           t: "rich-text",
-          o: [{ insert: `${args.note}\n` }],
+          o: deltaOps,
         },
       ];
       await submitOp(ctx, args.trip_key, textOps);

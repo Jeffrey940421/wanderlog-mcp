@@ -273,6 +273,32 @@ export function findTargetSection(
   return { index: places.index, section: places.section, label: "places to visit" };
 }
 
+/**
+ * Parse a note string with **bold** and *italic* markers into Quill delta ops.
+ */
+export function noteToDeltaOps(note: string): Array<Record<string, unknown>> {
+  const ops: Array<Record<string, unknown>> = [];
+  const pattern = /(\*\*(.+?)\*\*)|(\*(.+?)\*)|([^*]+)/g;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(note)) !== null) {
+    if (match[2] !== undefined) {
+      ops.push({ insert: match[2], attributes: { bold: true } });
+    } else if (match[4] !== undefined) {
+      ops.push({ insert: match[4], attributes: { italic: true } });
+    } else if (match[5] !== undefined) {
+      ops.push({ insert: match[5] });
+    }
+  }
+  if (ops.length > 0) {
+    const last = ops[ops.length - 1]!;
+    const text = last.insert as string;
+    if (!text.endsWith("\n")) {
+      last.insert = text + "\n";
+    }
+  }
+  return ops;
+}
+
 /** Build a note block matching the shape captured from the Wanderlog UI. */
 export function buildNoteBlock(userId: number): Record<string, unknown> {
   return {

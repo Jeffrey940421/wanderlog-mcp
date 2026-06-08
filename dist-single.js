@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// v2 — heading-based section lookup
+// v3 — rich text formatting (**bold** *italic*)
 import { createRequire as __WEBPACK_EXTERNAL_createRequire } from "module";
 /******/ var __webpack_modules__ = ({
 
@@ -31598,6 +31598,33 @@ function findTargetSection(trip, day) {
     }
     return { index: places.index, section: places.section, label: "places to visit" };
 }
+/**
+ * Parse a note string with **bold** and *italic* markers into Quill delta ops.
+ */
+function noteToDeltaOps(note) {
+    const ops = [];
+    const pattern = /(\*\*(.+?)\*\*)|(\*(.+?)\*)|([^*]+)/g;
+    let match;
+    while ((match = pattern.exec(note)) !== null) {
+        if (match[2] !== undefined) {
+            ops.push({ insert: match[2], attributes: { bold: true } });
+        }
+        else if (match[4] !== undefined) {
+            ops.push({ insert: match[4], attributes: { italic: true } });
+        }
+        else if (match[5] !== undefined) {
+            ops.push({ insert: match[5] });
+        }
+    }
+    if (ops.length > 0) {
+        const last = ops[ops.length - 1];
+        const text = last.insert;
+        if (!text.endsWith("\n")) {
+            last.insert = text + "\n";
+        }
+    }
+    return ops;
+}
 /** Build a note block matching the shape captured from the Wanderlog UI. */
 function buildNoteBlock(userId) {
     return {
@@ -32457,12 +32484,14 @@ async function addPlace(ctx, args) {
         ];
         await submitOp(ctx, args.trip_key, ops);
         // Follow-up: set inline note text via rich-text subtype op
+        // Supports **bold** and *italic* markdown syntax via Quill delta
         if (args.note) {
+            const deltaOps = noteToDeltaOps(args.note);
             const textOps = [
                 {
                     p: [...blockPath, "text"],
                     t: "rich-text",
-                    o: [{ insert: `${args.note}\n` }],
+                    o: deltaOps,
                 },
             ];
             await submitOp(ctx, args.trip_key, textOps);
