@@ -1,4 +1,6 @@
-#!/usr/bin/env nodeimport { createRequire as __WEBPACK_EXTERNAL_createRequire } from "module";
+#!/usr/bin/env node
+// v2 — heading-based section lookup
+import { createRequire as __WEBPACK_EXTERNAL_createRequire } from "module";
 /******/ var __webpack_modules__ = ({
 
 /***/ 5091:
