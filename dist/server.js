@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { addSection, addSectionDescription, addSectionInputSchema, } from "./tools/add-section.js";
+import { removeSection, removeSectionDescription, removeSectionInputSchema, } from "./tools/remove-section.js";
 import { addChecklist, addChecklistDescription, addChecklistInputSchema, } from "./tools/add-checklist.js";
 import { addExpense, addExpenseDescription, addExpenseInputSchema, } from "./tools/add-expense.js";
 import { annotatePlace, annotatePlaceDescription, annotatePlaceInputSchema, } from "./tools/annotate-place.js";
@@ -110,6 +111,11 @@ export function buildServer(ctx) {
         description: addSectionDescription,
         inputSchema: addSectionInputSchema,
     }, requireAuth(ctx, async (args) => addSection(ctx, args)));
+    server.registerTool("wanderlog_remove_section", {
+        title: "Remove a custom section from a Wanderlog trip",
+        description: removeSectionDescription,
+        inputSchema: removeSectionInputSchema,
+    }, requireAuth(ctx, async (args) => removeSection(ctx, args)));
     server.registerTool("wanderlog_add_place", {
         title: "Add a place to a Wanderlog trip",
         description: addPlaceDescription,

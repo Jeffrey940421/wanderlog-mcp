@@ -6,6 +6,11 @@ import {
   addSectionInputSchema,
 } from "./tools/add-section.js";
 import {
+  removeSection,
+  removeSectionDescription,
+  removeSectionInputSchema,
+} from "./tools/remove-section.js";
+import {
   addChecklist,
   addChecklistDescription,
   addChecklistInputSchema,
@@ -239,6 +244,16 @@ export function buildServer(ctx: AppContext): McpServer {
       inputSchema: addSectionInputSchema,
     },
     requireAuth(ctx, async (args) => addSection(ctx, args as Parameters<typeof addSection>[1])),
+  );
+
+  server.registerTool(
+    "wanderlog_remove_section",
+    {
+      title: "Remove a custom section from a Wanderlog trip",
+      description: removeSectionDescription,
+      inputSchema: removeSectionInputSchema,
+    },
+    requireAuth(ctx, async (args) => removeSection(ctx, args as Parameters<typeof removeSection>[1])),
   );
 
   server.registerTool(

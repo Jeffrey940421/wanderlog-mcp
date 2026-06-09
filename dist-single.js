@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// v3 — rich text formatting (**bold** *italic*)
+// v4 — remove_section tool
 import { createRequire as __WEBPACK_EXTERNAL_createRequire } from "module";
 /******/ var __webpack_modules__ = ({
 
@@ -31737,6 +31737,35 @@ async function addSection(ctx, args) {
     }
 }
 
+;// CONCATENATED MODULE: ./tabelog-scraper/wanderlog-mcp/src/tools/remove-section.ts
+
+
+
+const removeSectionInputSchema = {
+    trip_key: stringType().min(1).describe("The trip to remove the section from."),
+    heading: stringType().min(1).describe("The heading name of the section to remove. E.g. '寿司', '焼肉'."),
+};
+const removeSectionDescription = `
+Removes a custom section (normal+placeList) from a trip by its heading name.
+This deletes the section AND all places within it. Cannot be undone.
+`.trim();
+async function removeSection(ctx, args) {
+    try {
+        const trip = await ctx.tripCache.get(args.trip_key);
+        const found = findSectionByHeading(trip, args.heading);
+        if (!found) {
+            return { content: [{ type: "text", text: `Section "${args.heading}" not found in "${trip.title}".` }], isError: false };
+        }
+        const ops = [{ p: ["itinerary", "sections", found.index], ld: found.section }];
+        await submitOp(ctx, args.trip_key, ops);
+        return { content: [{ type: "text", text: `Removed section "${args.heading}" from "${trip.title}".` }], isError: false };
+    }
+    catch (err) {
+        const msg = err instanceof WanderlogError ? err.toUserMessage() : `Unexpected error: ${err.message}`;
+        return { content: [{ type: "text", text: msg }], isError: true };
+    }
+}
+
 ;// CONCATENATED MODULE: ./tabelog-scraper/wanderlog-mcp/src/tools/add-checklist.ts
 
 
@@ -34035,6 +34064,7 @@ async function getGuide(ctx, args) {
 
 
 
+
 const AUTH_ERROR_RESPONSE = {
     content: [
         {
@@ -34127,6 +34157,11 @@ function buildServer(ctx) {
         description: addSectionDescription,
         inputSchema: addSectionInputSchema,
     }, requireAuth(ctx, async (args) => addSection(ctx, args)));
+    server.registerTool("wanderlog_remove_section", {
+        title: "Remove a custom section from a Wanderlog trip",
+        description: removeSectionDescription,
+        inputSchema: removeSectionInputSchema,
+    }, requireAuth(ctx, async (args) => removeSection(ctx, args)));
     server.registerTool("wanderlog_add_place", {
         title: "Add a place to a Wanderlog trip",
         description: addPlaceDescription,
